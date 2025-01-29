@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrandAI - AI Business Name & Logo Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(120deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <h1 class="text-2xl font-bold text-indigo-600">BrandAI</h1>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="loginBtn" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                        <i class="bi bi-google mr-2"></i> Sign in with Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative gradient-bg">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
+                    Generate Perfect Brand Names & Logos
+                </h2>
+                <p class="mt-6 max-w-2xl mx-auto text-xl text-indigo-100">
+                    Powered by AI, create unique brand identities in seconds
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Input Section -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input type="text" id="industryInput" placeholder="Enter your industry or keywords" class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <button onclick="generateResults()" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                        Generate Ideas
+                    </button>
+                </div>
+                <p class="mt-2 text-sm text-gray-500">3 free generations remaining today</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Results will be dynamically inserted here -->
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="mt-16">
+            <h3 class="text-2xl font-bold text-center mb-8">Pricing Plans</h3>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h4 class="text-xl font-semibold mb-4">Free</h4>
+                    <p class="text-gray-600 mb-4">Perfect for trying out</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>3 generations per day</li>
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>Basic logo downloads</li>
+                    </ul>
+                    <p class="text-2xl font-bold mb-6">$0</p>
+                    <button class="w-full py-2 px-4 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50">Current Plan</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 transform scale-105">
+                    <div class="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 text-sm rounded-tr-lg rounded-bl-lg">Popular</div>
+                    <h4 class="text-xl font-semibold mb-4">Pro</h4>
+                    <p class="text-gray-600 mb-4">For serious branding</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>Unlimited generations</li>
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>Premium logo templates</li>
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>Branding tips</li>
+                    </ul>
+                    <p class="text-2xl font-bold mb-6">$4.99<span class="text-gray-500 text-base font-normal">/month</span></p>
+                    <button class="w-full py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Upgrade Now</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h4 class="text-xl font-semibold mb-4">One-time</h4>
+                    <p class="text-gray-600 mb-4">Single logo package</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>High-resolution logo</li>
+                        <li class="flex items-center"><i class="bi bi-check text-green-500 mr-2"></i>Source files included</li>
+                    </ul>
+                    <p class="text-2xl font-bold mb-6">$9.99</p>
+                    <button class="w-full py-2 px-4 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50">Purchase</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        const sampleNames = [
+            "TechVibe",
+            "InnoFlow",
+            "DigitalPulse",
+            "CloudNova",
+            "ByteWave",
+            "DataPeak"
+        ];
+
+        const sampleColors = [
+            "#4F46E5",
+            "#7C3AED",
+            "#06B6D4",
+            "#10B981",
+            "#F59E0B",
+            "#EF4444"
+        ];
+
+        function generateLogo(name, color) {
+            const svg = `
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="${color}" />
+                    <text x="50" y="50" text-anchor="middle" dy=".3em" fill="white" font-size="24px" font-weight="bold">
+                        ${name.substring(0, 2)}
+                    </text>
+                </svg>
+            `;
+            return `data:image/svg+xml;base64,${btoa(svg)}`;
+        }
+
+        function generateResults() {
+            const industry = document.getElementById('industryInput').value;
+            if (!industry) {
+                alert('Please enter an industry or keywords');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+
+            // Generate 6 random results
+            for (let i = 0; i < 6; i++) {
+                const name = sampleNames[i];
+                const color = sampleColors[i];
+                const logo = generateLogo(name, color);
+
+                const resultCard = document.createElement('div');
+                resultCard.className = 'result-card bg-white p-6 rounded-lg shadow-sm hover:shadow-md';
+                resultCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <img src="${logo}" alt="${name} logo" class="w-16 h-16">
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="bi bi-heart text-xl"></i>
+                        </button>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">${name}</h3>
+                    <p class="text-gray-500 text-sm mb-4">Available domain: ${name.toLowerCase()}.com</p>
+                    <div class="flex justify-between items-center">
+                        <button class="px-4 py-2 text-sm border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50">
+                            Download Basic
+                        </button>
+                        <button class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                            Get HD ($9.99)
+                        </button>
+                    </div>
+                `;
+                resultsContainer.appendChild(resultCard);
+            }
+        }
+
+        // Initialize Firebase (replace with your config)
+        const firebaseConfig = {
+            // Your Firebase config here
+        };
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            // Implement Google Sign-in
+            console.log('Google Sign-in clicked');
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
